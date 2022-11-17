@@ -104,7 +104,7 @@ def find_address_and_photos(hotel_id: str, photos_need: bool, photos_amount: int
             return None
 
 
-def make_info_message(results: dict, number_days: int) -> list:
+def make_info_message(results: dict, number_days: int, photos_need: bool, photos_amount: int) -> list:
     """ Преобразует полученный запрос в список, где каждый элемент содержит id отеля и сообщение о нем. """
     make_log(lvl='info', text=f'making messages for low or high')
 
@@ -126,16 +126,20 @@ def make_info_message(results: dict, number_days: int) -> list:
             message = ''.join([message, 'Расстояние от центра (км): ', city_center_distance_km, '\n',
                                'Цена за сутки: ', price, '\n', 'Цена за период: ', total_price, '\n'])
 
-            messages.append([hotel_id, message])
+            to_find = find_address_and_photos(hotel_id, photos_need, photos_amount)
+            address = to_find[0]
+            message = ''.join([message, 'Адрес: ', address, '\n'])
+            photos = to_find[1]
 
-            find_address_and_photos(hotel_id, True, 5)
+            messages.append([hotel_id, message, photos])
 
         return messages
     except (KeyError, TypeError):
         return None
 
 
-def find_hotels(city_id: str, hotels_amount: int, checkin_date: str, checkout_date: str, command: str) -> list:
+def find_hotels(city_id: str, hotels_amount: int, checkin_date: str, checkout_date: str, command: str,
+                photos_need: bool, photos_amount: int) -> list:
     """Функция запроса по поиску отелей. Возвращает список со списками из ID отеля и строкой с сообщением"""
     make_log(lvl='info', text='find hotels worked')
 
@@ -186,10 +190,135 @@ def find_hotels(city_id: str, hotels_amount: int, checkin_date: str, checkout_da
         results = json.loads(f"{{{find[0]}}}")
         print(results)
         number_days = calculate_days(checkin_date, checkout_date)
-        new_messages = make_info_message(results, number_days)
+        new_messages = make_info_message(results, number_days, photos_need, photos_amount)
         print('nm', new_messages)
         return new_messages
     else:
         return None
 
-find_hotels(city_id="2114", hotels_amount=10, checkin_date='2022-10-10', checkout_date='2022-10-15', command='/lowprice')
+
+# find_hotels(city_id="2114", hotels_amount=10, checkin_date='2022-10-10', checkout_date='2022-10-15',
+#            command='/lowprice', photos_need=True, photos_amount=5)
+
+
+def check_center_distance(hotel_info: dict, distance_max: int) -> list:
+    """ Функция проверяет отели на соответствие их расстояния до центра города заданному. """
+    make_log(lvl='info', text='check_center_distance worked')
+
+    flag = False
+    city_center_dist_km = 0
+
+    dist = hotel_info['destinationInfo']['distanceFromDestination']['value']
+    city_center_distance_ml = float(dist)
+    city_center_distance_km = round(1.609344 * city_center_distance_ml, 1)
+    if city_center_distance_km <= distance_max:
+        flag = True
+
+    return [flag, city_center_distance_km]
+
+
+def make_bestdeal_message(results: dict, hotels_amount: int, distance_max: int, number_days: int,
+                          photos_need: bool, photos_amount: int) -> list:
+    """ Преобразует полученный запрос в список, где каждый элемент содержит id отеля и сообщение о нем. """
+    make_log(lvl='info', text='make bestdeal message worked')
+
+    messages = list()
+    try:
+        for i_hotel in results['properties']:
+            checked_hotel = check_center_distance(i_hotel, distance_max)
+
+            if checked_hotel[0]:
+                hotel_id = i_hotel['id']
+                message = ''.join(['*' * 30, '\n', 'Название: ', i_hotel['name'], '\n'])
+
+                city_center_distance_km = 'Не удалось определить'
+                city_center_distance = i_hotel['destinationInfo']['distanceFromDestination']['value']
+                city_center_distance_ml = float(city_center_distance)
+                city_center_distance_km = str(round(1.609344 * city_center_distance_ml, 1))
+
+                price = i_hotel['price']['lead']['formatted']
+                total = int(price[1:])
+                total_price = '$' + str(total * number_days)
+
+                message = ''.join([message, 'Расстояние от центра (км): ', city_center_distance_km, '\n',
+                                       'Цена за сутки: ', price, '\n', 'Цена за период: ', total_price, '\n'])
+
+                to_find = find_address_and_photos(hotel_id, photos_need, photos_amount)
+                address = to_find[0]
+                message = ''.join([message, 'Адрес: ', address, '\n'])
+                photos = to_find[1]
+
+                print('mes', message)
+                print('addph', to_find)
+
+                messages.append([hotel_id, message, photos])
+
+            if len(messages) == hotels_amount:
+                break
+
+        return messages
+
+    except (KeyError, TypeError) as exc:
+        make_log(lvl='error', text=f'bestdeal message {exc}')
+        return None
+
+
+def find_hotels_bestdeal(city_id: str, hotels_amount: int, checkin_date: str, checkout_date: str, photos_need: bool,
+                         photos_amount: int, distance_max: int, price_min: str, price_max: str) -> list:
+    """Функция запроса по поиску отелей. Возвращает список со списками из ID отеля и строкой с сообщением"""
+    make_log(lvl='info', text='find hotels bestdeal worked')
+
+    checkin_date_splited = checkin_date.split('-')
+    checkout_date_splited = checkout_date.split('-')
+
+    url = "https://hotels4.p.rapidapi.com/properties/v2/list"
+
+    payload = {
+            "currency": "USD",
+            "eapid": 1,
+            "locale": "ru_RU",
+            "siteId": 300000001,
+            "destination": {"regionId": city_id},
+            "checkInDate": {
+                "day": int(checkin_date_splited[2]),
+                "month": int(checkin_date_splited[1]),
+                "year": int(checkin_date_splited[0])
+            },
+            "checkOutDate": {
+                "day": int(checkout_date_splited[2]),
+                "month": int(checkout_date_splited[1]),
+                "year": int(checkout_date_splited[0])
+            },
+            "rooms": [{"adults": 1}],
+            "resultsStartingIndex": 0,
+            "resultsSize": hotels_amount,
+            "sort": "PRICE_LOW_TO_HIGH",
+            "filters": {"price": {
+                "max": int(price_max),
+                "min": int(price_min)
+            }}}
+
+    headers = {
+            "content-type": "application/json",
+            "X-RapidAPI-Key": RAPID_API_KEY,
+            "X-RapidAPI-Host": "hotels4.p.rapidapi.com"
+        }
+
+    response = request_to_api(mode="POST", url=url, headers=headers, query=payload)
+    pattern = r'(?<=HOT.SR.sort.PROPERTY_CLASS.false"}}]}]}]},).*(?=,"propertySearchListings")'
+    find = re.search(pattern, response.text)
+    new_messages = []
+    if find:
+        results = json.loads(f"{{{find[0]}}}")
+        number_days = calculate_days(checkin_date, checkout_date)
+        messages = make_bestdeal_message(results, hotels_amount, distance_max, number_days, photos_need, photos_amount)
+        new_messages.extend(messages)
+        print('nm', new_messages)
+        return new_messages
+
+    else:
+        return None
+
+
+# find_hotels_bestdeal(city_id="2114", hotels_amount=10, checkin_date='2022-10-10', checkout_date='2022-10-15',
+#                     photos_need=True, photos_amount=5, distance_max=15, price_min='10', price_max='100')

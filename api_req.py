@@ -26,6 +26,7 @@ def request_to_api(url: str, headers: dict, querystring: dict):
             return None
 
     except TimeoutError:
+        make_log(lvl='error', text='request to api TimeoutError')
         return None
 
 
@@ -51,6 +52,7 @@ def find_city_id(user_town: str) -> list:
                 cities.append({'city_name': result_destination, 'destination_id': city_info['destinationId']})
             return cities
         except KeyError:
+            make_log(lvl='error', text='find city id KeyError')
             return None
 
 
@@ -94,12 +96,10 @@ def find_hotels_bestdeal(city_id: str, hotels_amount: int, checkin_date: str, ch
                        "currency": "USD", "landmarkIds": "city center"}
 
         response = request_to_api(url=url, headers=headers_api, querystring=querystring)
-        print('resp', response)
         bestdeal_find = re.search(r'(?<=,)"searchResults":.+?(?=,"sortResults)', response)
         try:
             if bestdeal_find:
                 search_results = json.loads(f"{{{bestdeal_find[0]}}}")
-                print('serchr', search_results)
                 results = search_results['searchResults']
                 messages = make_bestdeal_message(results, hotels_amount, distance_max, number_days)
                 new_messages.extend(messages)

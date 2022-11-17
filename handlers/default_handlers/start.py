@@ -23,6 +23,7 @@ def bot_start(message: Message) -> None:
 @bot.callback_query_handler(func=lambda call: call.data in ['/help', '/lowprice', '/highprice', '/bestdeal', '/history'])
 def callback_inline(call):
     """ Обрабатывает нажатие кнопок с командами бота. """
+
     if call.message:
         make_log(lvl='info', text=f'callback for inline commands worked for chat_id {call.message.chat.id}')
 
@@ -35,4 +36,4 @@ def callback_inline(call):
         elif call.data == '/bestdeal':
             my_handlers.bestdeal.bestdeal_reply(call.message)
         elif call.data in ['/history']:
-            default_handlers.temporary.other_commands_reply(call.message)
+            my_handlers.history.history_reply(call.message)

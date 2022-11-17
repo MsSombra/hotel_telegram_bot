@@ -9,6 +9,7 @@ from datetime import date
 from utils.change_language_date import change_language_date
 from . import send_hotels_info
 from media.send_media import one_animation
+from database.db_for_history import UserReq
 
 
 @bot.message_handler(state=UserInfoState.city)
@@ -18,6 +19,9 @@ def get_city(message: Message) -> None:
     Записывает информацию о выбранном городе.
     """
     make_log(lvl='info', text=f'city asked for chat_id {message.chat.id}')
+
+    with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
+        data['request'] = UserReq.create(user_id=message.from_user.id, command=data['command'][1:], city=message.text)
 
     new_markup = city_markup(message.text)
     if new_markup is not None:

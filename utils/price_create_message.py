@@ -32,5 +32,6 @@ def make_info_message(results: dict) -> list:
 
             messages.append([hotel_id, message])
         return messages
-    except (KeyError, TypeError):
+    except (KeyError, TypeError) as exc:
+        make_log(lvl='error', text=f'low or high price message {exc}')
         return None

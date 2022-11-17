@@ -3,6 +3,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 def commands_markup() -> InlineKeyboardMarkup:
     """ Создает клавиатуру с кнопками для имеющихся команд"""
+
     markup_inline = InlineKeyboardMarkup(row_width=1)
     btn_help = InlineKeyboardButton(text="/help", callback_data="/help")
     btn_lowprice = InlineKeyboardButton(text="/lowprice", callback_data="/lowprice")

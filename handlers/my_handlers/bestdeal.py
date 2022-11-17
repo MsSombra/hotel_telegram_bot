@@ -10,6 +10,7 @@ from media.send_media import one_animation
 def bestdeal_reply(message: Message) -> None:
     """ Поиск отелей по цене и расстоянию до центра в городе, заданном пользователем. Запрашивает город. """
     make_log(lvl='info', text=f'bestdeal started for chat_id {message.chat.id}')
+
     bot.set_state(message.chat.id, UserInfoState.city)
     bot.send_message(message.chat.id, 'В каком городе будем искать?')
     with bot.retrieve_data(message.chat.id) as data:
@@ -50,6 +51,7 @@ def get_price_min(message: Message) -> None:
 def get_price_max(message: Message) -> None:
     """ Принимает и записывает максимальную цену. Переходит к поиску. """
     make_log(lvl='info', text=f'max price asked for chat_id {message.chat.id}')
+
     if message.text.isdigit():
         with bot.retrieve_data(message.from_user.id, message.chat.id) as data:
             data['price_max'] = message.text

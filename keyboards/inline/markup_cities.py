@@ -4,6 +4,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 def city_markup(name_city: str) -> InlineKeyboardMarkup:
     """ Вызывает функцию для поиска городов, по найденным совпадениям создает клавиатуру с кнопками. """
+
     cities = find_city_id(name_city)
     destinations = InlineKeyboardMarkup()
     if cities:

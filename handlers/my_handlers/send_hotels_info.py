@@ -3,6 +3,7 @@ from log_func import make_log
 from telebot.types import Message
 from api_req import find_hotels, find_hotels_bestdeal, find_photo_url
 from media.send_media import several_photos, one_animation, one_photo
+from database.db_for_history import HotelsInfo
 
 
 def send_info(message: Message, dct: dict):
@@ -12,7 +13,9 @@ def send_info(message: Message, dct: dict):
     """
     make_log(lvl='info', text=f'send info started for chat_id {message.chat.id}')
 
-    print(dct)
+    get_photo = dct['photos_need']
+    number_photo = dct['photos_amount']
+
     if dct["command"] == '/bestdeal':
         messages_to_send = find_hotels_bestdeal(city_id=dct["city_id"],
                                                 checkin_date=dct["checkin_date"],
@@ -30,12 +33,11 @@ def send_info(message: Message, dct: dict):
                                        command=dct["command"]
                                        )
 
-    get_photo = dct['photos_need']
-    number_photo = dct['photos_amount']
-
     if messages_to_send is not None and len(messages_to_send) > 0:
         for i_message in messages_to_send:
             bot.send_message(message.chat.id, i_message[1])
+            HotelsInfo.create(request_id=dct['request'], text_message=i_message[1])
+
             if get_photo:
                 photo_paths = find_photo_url(hotel_id=i_message[0], photo_number=number_photo)
                 several_photos(message=message, paths=photo_paths)
