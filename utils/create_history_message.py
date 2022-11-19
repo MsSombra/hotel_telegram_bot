@@ -7,18 +7,23 @@ def make_history_message(user_id: str) -> list:
     make_log(lvl='info', text=f'making history message for user {user_id}')
 
     messages = list()
-    for info in UserReq.select().where(UserReq.user_id == user_id):
-        message = ''.join([f'Выбранная команда: {info.command}\n',
-                           f'Дата и время запроса: {info.date.strftime("%Y.%m.%d, %H:%M ")}\n',
-                           f'Город поиска: {info.city}\n',
-                           'Найденные отели: \n'])
+    if UserReq.select().where(UserReq.user_id == user_id):
+        for info in UserReq.select().where(UserReq.user_id == user_id):
+            message = ''.join([f'Выбранная команда: {info.command}\n',
+                               f'Дата и время запроса: {info.date.strftime("%Y.%m.%d, %H:%M ")}\n',
+                               f'Город поиска: {info.city}\n',
+                               'Найденные отели: \n'])
 
-        if info.request:
-            for hotel in info.request:
-                message = ''.join([message, '*' * 15, '\n', hotel.text_message, '\n'])
-        else:
-            message = ''.join([message, '\n', 'Запрос не дал результатов.'])
+            if info.request:
+                for hotel in info.request:
+                    message = ''.join([message, '\n', hotel.text_message, '\n'])
+            else:
+                message = ''.join([message, '\n', 'Запрос не дал результатов.'])
 
+            messages.append(message)
+
+    else:
+        message = 'Ваша история поиска пока что пуста.'
         messages.append(message)
 
     return messages
