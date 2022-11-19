@@ -25,11 +25,11 @@ def make_info_message(results: dict, number_days: int) -> list:
                     city_center_distance_km = round(1.609344 * city_center_distance_ml, 1)
 
             price = re.sub(',', '', hotel['ratePlan']['price']['current'])
-            price = re.sub(',', '', hotel['ratePlan']['price']['current'])
             one_price = int(re.sub(r'\D', '', price))
             total_price = str(one_price * number_days)
+            print('tp', total_price)
             message = ''.join([message, 'Расстояние от центра: ', str(city_center_distance_km), ' км', '\n',
-                               'Цена за сутки: ', price, '\n', 'Цена за период: ', total_price, '\n'])
+                               'Цена за сутки: ', price, '\n', 'Цена за период: $', total_price, '\n'])
 
             hotel_id = hotel['id']
             url = f'https://hotels.com/ho{hotel_id}'
