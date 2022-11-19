@@ -10,4 +10,3 @@ if __name__ == '__main__':
     bot.add_custom_filter(StateFilter(bot))
     set_all_commands()
     bot.polling(none_stop=True)
-

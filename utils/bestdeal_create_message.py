@@ -7,7 +7,6 @@ def check_center_distance(hotel_info: dict, distance_max: int) -> list:
     make_log(lvl='info', text='check_center_distance worked')
     flag = False
     city_center_dist_km = 0
-    print('lm', hotel_info['landmarks'])
     for i_hotel in hotel_info['landmarks']:
         if i_hotel['label'].lower() == 'центр города' or i_hotel['label'].lower() == 'city center':
             dist_1 = re.sub(',', '.', i_hotel['distance'])
@@ -37,12 +36,8 @@ def make_bestdeal_message(results: dict, hotels_amount: int, distance_max: int, 
                     message = ''.join([message, 'Адрес: ', 'Информация с адресом отсутствует', '\n'])
 
                 price = re.sub(',', '', i_hotel['ratePlan']['price']['current'])
-                if 'fullyBundledPricePerStay' in i_hotel['ratePlan']['price'].keys():
-                    find_total_price = re.search(r'\$\d+', i_hotel['ratePlan']['price']['fullyBundledPricePerStay'])
-                    total_price = find_total_price.group()
-                else:
-                    one_price = int(re.sub(r'\D', '', price))
-                    total_price = str(one_price * number_days)
+                one_price = int(re.sub(r'\D', '', price))
+                total_price = str(one_price * number_days)
                 message = ''.join([message, 'Расстояние от центра: ',  str(checked_hotel[1]), ' км', '\n',
                                    'Цена за сутки: ', price, '\n', 'Цена за период: ', total_price, '\n'])
 
@@ -59,5 +54,3 @@ def make_bestdeal_message(results: dict, hotels_amount: int, distance_max: int, 
     except (KeyError, TypeError) as exc:
         make_log(lvl='error', text=f'bestdeal message {exc}')
         return None
-
-

@@ -13,4 +13,3 @@ def history_reply(message: Message) -> None:
     for text in messages:
         bot.send_message(message.from_user.id, text)
 
-

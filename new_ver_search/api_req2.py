@@ -131,6 +131,10 @@ def make_info_message(results: dict, number_days: int, photos_need: bool, photos
             message = ''.join([message, 'Адрес: ', address, '\n'])
             photos = to_find[1]
 
+            hotel_id = hotel['id']
+            url = f'https://www.hotels.com/h{hotel_id}.Hotel-Information'
+            message = ''.join([message, 'Ссылка на сайт: ', url, '\n'])
+
             messages.append([hotel_id, message, photos])
 
         return messages
@@ -248,8 +252,8 @@ def make_bestdeal_message(results: dict, hotels_amount: int, distance_max: int, 
                 message = ''.join([message, 'Адрес: ', address, '\n'])
                 photos = to_find[1]
 
-                print('mes', message)
-                print('addph', to_find)
+                url = f'https://www.hotels.com/h{hotel_id}.Hotel-Information'
+                message = ''.join([message, 'Ссылка на сайт: ', url, '\n'])
 
                 messages.append([hotel_id, message, photos])
 

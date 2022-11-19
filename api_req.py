@@ -74,7 +74,8 @@ def find_hotels(city_id: str, hotels_amount: str, checkin_date: str, checkout_da
     low_price_find = re.search(r'(?<=,)"results":.+?(?=,"pagination)', response)
     if low_price_find:
         results = json.loads(f"{{{low_price_find[0]}}}")
-        new_messages = make_info_message(results)
+        number_days = calculate_days(checkin_date, checkout_date)
+        new_messages = make_info_message(results, number_days)
         return new_messages
     else:
         return None
