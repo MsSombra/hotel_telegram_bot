@@ -1,17 +1,17 @@
-from telebot.types import Message
 from loader import bot
 from log_func import make_log
 from media.send_media import one_photo
+from telebot.types import Message
 
 
 @bot.message_handler(commands=['help'])
 def bot_help(message: Message) -> None:
     """ Команда help. Отправляет пользователю пояснения имеющихся команд. """
-    make_log(lvl='info', text=f'help command worked for chat_id {message.chat.id}')
+    make_log(lvl='info', text=f'help command reply worked for chat_id {message.chat.id}')
 
     one_photo(message=message, file_name='Gorlum.png')
 
-    reply_help = 'Моя прелесть, мы тоже иногда не понимаем эльфийский, но сейчас объясним подробнее.\n' \
+    reply_help = 'Моя прелесть знает перевод с эльфийского.\n' \
                  'Все команды с кратким пояснением можно посмотреть по кнопке Меню в левом нижнем углу.' \
                  'Также их можно записывать самостоятельно или выбирать по кнопке в приветственном сообщении.\n' \
                  '/start - вызывает приветственное сообщение с командами-кнопками.\n' \

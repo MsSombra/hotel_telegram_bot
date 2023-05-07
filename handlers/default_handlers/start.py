@@ -1,15 +1,15 @@
-from telebot.types import Message
-from loader import bot
 from handlers import default_handlers, my_handlers
 from keyboards.inline import all_commands
+from loader import bot
 from log_func import make_log
 from media.send_media import one_photo
+from telebot.types import Message
 
 
 @bot.message_handler(commands=['start'])
 def bot_start(message: Message) -> None:
     """ Команда start. Отправляет пользователю приветственное сообщение и кнопки с командами. """
-    make_log(lvl='info', text='start command worked')
+    make_log(lvl='info', text=f'start command reply worked for chat_id: {message.chat.id}')
 
     one_photo(message=message, file_name='Barlyman.png')
 
@@ -30,8 +30,8 @@ def callback_inline(call):
         if call.data == '/help':
             default_handlers.help.bot_help(call.message)
         elif call.data == '/lowprice':
-            my_handlers.low_and_high.lowprice(call.message)
+            my_handlers.low_and_high.low_price(call.message)
         elif call.data == '/highprice':
-            my_handlers.low_and_high.highprice(call.message)
+            my_handlers.low_and_high.high_price(call.message)
         elif call.data == '/bestdeal':
             my_handlers.bestdeal.bestdeal_reply(call.message)

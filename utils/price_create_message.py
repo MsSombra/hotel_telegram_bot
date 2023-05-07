@@ -1,10 +1,11 @@
 import re
+
 from log_func import make_log
 
 
 def make_info_message(results: dict, number_days: int) -> list:
     """ Преобразует полученный запрос в список, где каждый элемент содержит id отеля и сообщение о нем. """
-    make_log(lvl='info', text=f'making messages for low or high')
+    make_log(lvl='info', text=f'(func: make_info_message): start making messages for low or high')
 
     messages = list()
     try:
@@ -36,7 +37,10 @@ def make_info_message(results: dict, number_days: int) -> list:
             message = ''.join([message, 'Ссылка на сайт: ', url, '\n'])
 
             messages.append([hotel_id, message])
+
+        make_log(lvl='info', text=f'(func: make_info_message): end making messages for low or high')
+
         return messages
     except (KeyError, TypeError) as exc:
-        make_log(lvl='error', text=f'low or high price message {exc}')
+        make_log(lvl='error', text=f'(func: make_info_message): not made - {exc}')
         return None

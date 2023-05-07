@@ -1,4 +1,5 @@
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from log_func import make_log
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 def commands_markup() -> InlineKeyboardMarkup:
@@ -11,4 +12,5 @@ def commands_markup() -> InlineKeyboardMarkup:
     btn_bestdeal = InlineKeyboardButton(text="/bestdeal", callback_data="/bestdeal")
 
     markup_inline.add(btn_help, btn_lowprice, btn_highprice, btn_bestdeal)
+    make_log(lvl='info', text="(func: commands_markup): commands markup made")
     return markup_inline

@@ -1,10 +1,12 @@
 import re
+
 from log_func import make_log
 
 
 def check_center_distance(hotel_info: dict, distance_max: int) -> list:
     """ Функция проверяет отели на соответствие их расстояния до центра города заданному. """
-    make_log(lvl='info', text='check_center_distance worked')
+    make_log(lvl='info', text='(func: check_center_distance) start working')
+
     flag = False
     city_center_dist_km = 0
     for i_hotel in hotel_info['landmarks']:
@@ -15,12 +17,14 @@ def check_center_distance(hotel_info: dict, distance_max: int) -> list:
             city_center_distance_km = round(1.609344 * city_center_distance_ml, 1)
             if city_center_distance_km <= distance_max:
                 flag = True
+
+    make_log(lvl='info', text='(func: check_center_distance) end working')
     return [flag, city_center_distance_km]
 
 
 def make_bestdeal_message(results: dict, hotels_amount: int, distance_max: int, number_days: int) -> list:
     """ Преобразует полученный запрос в список, где каждый элемент содержит id отеля и сообщение о нем. """
-    make_log(lvl='info', text='make_bestdeal_message worked')
+    make_log(lvl='info', text='(func: make_bestdeal_message) start working')
 
     messages = list()
     try:
@@ -49,8 +53,10 @@ def make_bestdeal_message(results: dict, hotels_amount: int, distance_max: int, 
             if len(messages) == hotels_amount:
                 break
 
+        make_log(lvl='info', text='(func: make_bestdeal_message) end working')
+
         return messages
 
     except (KeyError, TypeError) as exc:
-        make_log(lvl='error', text=f'bestdeal message {exc}')
+        make_log(lvl='error', text=f'(func: make_bestdeal_message) not made - {exc}')
         return None
