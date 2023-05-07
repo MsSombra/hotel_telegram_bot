@@ -3,7 +3,7 @@ import re
 from log_func import make_log
 
 
-def check_center_distance(hotel_info: dict, distance_max: int) -> list:
+def check_center_distance(hotel_info: dict, distance_max: int) -> list | None:
     """ Функция проверяет отели на соответствие их расстояния до центра города заданному. """
     make_log(lvl='info', text='(func: check_center_distance) start working')
 

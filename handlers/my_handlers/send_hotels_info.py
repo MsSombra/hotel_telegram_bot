@@ -1,4 +1,5 @@
-from api_req import find_hotels, find_hotels_bestdeal, find_photo_url
+# from api_req import find_hotels, find_hotels_bestdeal, find_photo_url
+from api_req2 import find_hotels, find_hotels_bestdeal
 from database.db_for_history import HotelsInfo
 from loader import bot
 from log_func import make_log
@@ -24,14 +25,31 @@ def send_info(message: Message, dct: dict):
                                                 distance_max=dct["distance_max"],
                                                 price_min=dct["price_min"],
                                                 price_max=dct["price_max"],
+                                                photos_need=get_photo,
+                                                photos_amount=number_photo,
                                                 )
     else:
         messages_to_send = find_hotels(city_id=dct["city_id"],
                                        checkin_date=dct["checkin_date"],
                                        checkout_date=dct["checkout_date"],
                                        hotels_amount=dct["hotels_amount"],
-                                       command=dct["command"]
+                                       command=dct["command"],
+                                       photos_need=get_photo,
+                                       photos_amount=number_photo,
                                        )
+
+    # if messages_to_send is not None and len(messages_to_send) > 0:
+    #     for i_message in messages_to_send:
+    #         bot.send_message(message.chat.id, i_message[1])
+    #         HotelsInfo.create(request_id=dct['request'], text_message=i_message[1])
+    #
+    #         if get_photo:
+    #             photo_paths = find_photo_url(hotel_id=i_message[0], photo_number=number_photo)
+    #             several_photos(message=message, paths=photo_paths)
+    #
+    #     one_photo(message=message, file_name='Frodo.jpg')
+    #     bot.send_message(message.chat.id, 'Поиск окончен. ')
+
 
     if messages_to_send is not None and len(messages_to_send) > 0:
         for i_message in messages_to_send:
@@ -39,12 +57,11 @@ def send_info(message: Message, dct: dict):
             HotelsInfo.create(request_id=dct['request'], text_message=i_message[1])
 
             if get_photo:
-                photo_paths = find_photo_url(hotel_id=i_message[0], photo_number=number_photo)
+                photo_paths = i_message[2]
                 several_photos(message=message, paths=photo_paths)
 
         one_photo(message=message, file_name='Frodo.jpg')
         bot.send_message(message.chat.id, 'Поиск окончен. ')
-
     else:
         one_animation(message=message, file_name='sorry.gif')
         bot.send_message(message.chat.id, 'По вашему запросу ни чего не найдено. Попробуйте еще раз')

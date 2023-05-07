@@ -3,7 +3,7 @@ import re
 from log_func import make_log
 
 
-def make_info_message(results: dict, number_days: int) -> list:
+def make_info_message(results: dict, number_days: int) -> list | None:
     """ Преобразует полученный запрос в список, где каждый элемент содержит id отеля и сообщение о нем. """
     make_log(lvl='info', text=f'(func: make_info_message): start making messages for low or high')
 

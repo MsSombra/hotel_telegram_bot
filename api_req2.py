@@ -23,7 +23,6 @@ def request_to_api(mode: str, url: str, headers: dict, query: dict):
     try:
         if response.status_code == requests.codes.ok:
             make_log(lvl='info', text=f'(func: request_to_api): response code {requests.codes.ok}')
-            # print('response api', response.text)
             return response
         else:
             make_log(lvl='error', text='(func: request_to_api): ConnectionError')
@@ -33,7 +32,7 @@ def request_to_api(mode: str, url: str, headers: dict, query: dict):
         make_log(lvl='error', text=f'(func: request_to_api): {e}')
 
 
-def find_city(city_name: str):
+def find_city_id(city_name: str) -> list | None:
     """ Функция ищет информацию о наличии города и возвращает все совпадения. """
     make_log(lvl='info', text=f'(func: find_city): start working for {city_name}')
 
@@ -46,23 +45,20 @@ def find_city(city_name: str):
     if find:
         cities = []
         result = json.loads(f"{{{find[0]}}}")
-        # print('res', result)
         for res in result['sr']:
             if res['type'] == "CITY" or res['type'] == "NEIGHBORHOOD":
                 cities.append({'city_name': res["regionNames"]["shortName"], 'destination_id': res["gaiaId"]})
-        # print('ct', cities)
 
         make_log(lvl='info', text=f'(func: find_city): end working for {city_name}')
         return cities
     else:
         return None
 
-# find_city('Вена')
-
 
 def find_address_and_photos(hotel_id: str, photos_need: bool, photos_amount: int) -> list | None:
-    """ Делает запрос для получения адреса и при необходимости фото
-    для функции send_info (Для проверки используется в make_info_message ниже). """
+    """
+    Делает запрос для получения адреса и при необходимости фото для функций make_info_message, make_bestdeal_message.
+    """
     make_log(lvl="info", text="(func: find_address_and_photos): start working")
 
     url = "https://hotels4.p.rapidapi.com/properties/v2/get-summary"
@@ -81,10 +77,9 @@ def find_address_and_photos(hotel_id: str, photos_need: bool, photos_amount: int
     }
 
     response = request_to_api(mode="POST", url=url, headers=headers, query=payload)
-    print('fiadpho', response.text)
     pattern = r'(?<="data":{).*}{3}'
+
     find = re.search(pattern, response.text)
-    print('f0', find[0])
     if find:
         messages = list()
         results = json.loads(f"{{{find[0][:-2]}}}")
@@ -102,7 +97,6 @@ def find_address_and_photos(hotel_id: str, photos_need: bool, photos_amount: int
             else:
                 messages.append(None)
 
-            print('mes', messages)
             make_log(lvl="info", text="(func: find_address_and_photos): end working")
             return messages
 
@@ -146,6 +140,7 @@ def make_info_message(results: dict, number_days: int, photos_need: bool, photos
 
         make_log(lvl='info', text=f'(func: make_info_message): low or high end')
         return messages
+
     except (KeyError, TypeError) as exc:
         make_log(lvl='error', text=f'(func: make_info_message): {exc}')
         return None
@@ -202,21 +197,16 @@ def find_hotels(city_id: str, hotels_amount: int, checkin_date: str, checkout_da
         find = re.search(pattern, response.text)
         if find:
             results = json.loads(f"{{{find[0]}}}")
-            # print(results)
             number_days = calculate_days(checkin_date, checkout_date)
             new_messages = make_info_message(results, number_days, photos_need, photos_amount)
-            # print('nm', new_messages)
             make_log(lvl='info', text='(func: find_hotels): end working')
             return new_messages
         else:
             return None
+
     except TypeError as exc:
         make_log(lvl="error", text=f"(func: find_hotels) - {exc}")
         return None
-
-
-# find_hotels(city_id="2114", hotels_amount=10, checkin_date='2022-10-10', checkout_date='2022-10-15',
-#            command='/lowprice', photos_need=True, photos_amount=5)
 
 
 def check_center_distance(hotel_info: dict, distance_max: int) -> list:
@@ -333,7 +323,6 @@ def find_hotels_bestdeal(city_id: str, hotels_amount: int, checkin_date: str, ch
             number_days = calculate_days(checkin_date, checkout_date)
             messages = make_bestdeal_message(results, hotels_amount, distance_max, number_days, photos_need, photos_amount)
             new_messages.extend(messages)
-            print('nm', new_messages)
             make_log(lvl='info', text='(func: find_hotels_bestdeal): end working')
             return new_messages
 
@@ -342,7 +331,3 @@ def find_hotels_bestdeal(city_id: str, hotels_amount: int, checkin_date: str, ch
     except TypeError as exc:
         make_log(lvl="error", text=f"(func: find_hotels_bestdeal): - {exc}")
         return None
-
-
-# find_hotels_bestdeal(city_id="2114", hotels_amount=10, checkin_date='2022-10-10', checkout_date='2022-10-15',
-#                     photos_need=True, photos_amount=5, distance_max=15, price_min='10', price_max='100')
