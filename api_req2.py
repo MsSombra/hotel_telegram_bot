@@ -4,7 +4,7 @@ import re
 import requests
 from config_data.config import RAPID_API_KEY
 from log_func import make_log
-from utils.bestdeal_create_message import make_bestdeal_message
+# from utils.bestdeal_create_message import make_bestdeal_message
 from utils.calculate_period import calculate_days
 
 
