@@ -1,14 +1,15 @@
-from log_func import make_log
 from database.db_for_history import UserReq
+from log_func import make_log
 
 
 def make_history_message(user_id: str) -> list:
     """ Функция запрашивает данные из БД users_history и собирает данные от user_id в список сообщений. """
-    make_log(lvl='info', text=f'making history message for user {user_id}')
+    make_log(lvl='info', text=f'(func: make_history_message): start for user {user_id}')
 
     messages = list()
-    if UserReq.select().where(UserReq.user_id == user_id):
-        for info in UserReq.select().where(UserReq.user_id == user_id):
+    query = UserReq.select().where(UserReq.user_id == user_id)
+    if query:
+        for info in query:
             message = ''.join([f'Выбранная команда: {info.command}\n',
                                f'Дата и время запроса: {info.date.strftime("%Y.%m.%d, %H:%M ")}\n',
                                f'Город поиска: {info.city}\n',
@@ -26,4 +27,5 @@ def make_history_message(user_id: str) -> list:
         message = 'Ваша история поиска пока что пуста.'
         messages.append(message)
 
+    make_log(lvl='info', text=f'(func: make_history_message): end for user {user_id}')
     return messages

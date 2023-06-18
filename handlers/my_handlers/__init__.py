@@ -1,5 +1,1 @@
-from . import bestdeal
-from . import history
-from . import low_and_high
-from . import same_questions
-from . import send_hotels_info
+from . import bestdeal, history, low_and_high, same_questions, send_hotels_info

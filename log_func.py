@@ -8,21 +8,22 @@ def make_log(lvl: str, text: str):
     :param text: передается текст сообщения лога
     :return: сообщение лога выводится в консоль и записывается в файл
     """
-    file_log = logging.FileHandler(f'{__name__}.log')
+    file = logging.FileHandler('log_file.log')
     console_out = logging.StreamHandler()
 
-    logging.basicConfig(handlers=(file_log, console_out),
+    logging.basicConfig(handlers=(file, console_out),
                         format='[%(asctime)s | %(levelname)s]: %(message)s',
                         datefmt='%m.%d.%Y %H:%M:%S',
-                        level=logging.INFO)
+                        level=logging.DEBUG,
+                        encoding='utf-8')
 
     if lvl == 'debag':
-        logging.debug(f"A DEBUG Message | {text}")
+        logging.debug(f"{text}")
     elif lvl == 'info':
-        logging.info(f"An INFO | {text}")
+        logging.info(f"{text}")
     elif lvl == 'warning':
-        logging.warning(f"A WARNING | {text}")
+        logging.warning(f"{text}")
     elif lvl == 'error':
-        logging.error(f"An ERROR | {text}")
+        logging.error(f"{text}")
     elif lvl == 'critical':
-        logging.critical(f"A message of CRITICAL severity | {text}")
+        logging.critical(f"{text}")

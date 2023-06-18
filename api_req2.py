@@ -1,18 +1,19 @@
 import json
+import re
+
 import requests
 from config_data.config import RAPID_API_KEY
-import re
 from log_func import make_log
-from utils.bestdeal_create_message import make_bestdeal_message
+# from utils.bestdeal_create_message import make_bestdeal_message
 from utils.calculate_period import calculate_days
 
 
-headers_api = {"X-RapidAPI-Key": RAPID_API_KEY, "X-RapidAPI-Host": "hotels4.p.rapidapi.com"}
+HEADERS_API = {"X-RapidAPI-Key": RAPID_API_KEY, "X-RapidAPI-Host": "hotels4.p.rapidapi.com"}
 
 
 def request_to_api(mode: str, url: str, headers: dict, query: dict):
     """ Функция для обращения к API по переданным параметрам (юрл, ключ, хост и запрос). """
-    make_log(lvl='info', text=f'request to api, url {url}, headers {headers}, query {query}')
+    make_log(lvl='info', text=f'(func: request_to_api): url {url}, headers {headers}, query {query}')
 
     if mode == "GET":
         response = requests.get(url=url, headers=headers, params=query, timeout=10)
@@ -21,44 +22,44 @@ def request_to_api(mode: str, url: str, headers: dict, query: dict):
 
     try:
         if response.status_code == requests.codes.ok:
-            make_log(lvl='info', text=f'response code {requests.codes.ok}')
-            # print('response api', response.text)
+            make_log(lvl='info', text=f'(func: request_to_api): response code {requests.codes.ok}')
             return response
         else:
-            make_log(lvl='error', text='request to api ConnectionError')
+            make_log(lvl='error', text='(func: request_to_api): ConnectionError')
             raise ConnectionError
 
     except (OSError, ConnectionError) as e:
-        make_log(lvl='error', text=f'request to api {e}')
+        make_log(lvl='error', text=f'(func: request_to_api): {e}')
 
 
-def find_city(city_name: str):
+def find_city_id(city_name: str) -> list | None:
     """ Функция ищет информацию о наличии города и возвращает все совпадения. """
-    make_log(lvl='info', text=f'try to find city {city_name}')
+    make_log(lvl='info', text=f'(func: find_city): start working for {city_name}')
 
     url = "https://hotels4.p.rapidapi.com/locations/v3/search"
     query = {"q": city_name, "locale": "ru_RU", "langid": "1033", "siteid": "300000001"}
-    response = request_to_api(mode="GET", url=url, headers=headers_api, query=query)
+    response = request_to_api(mode="GET", url=url, headers=HEADERS_API, query=query)
+
     pattern = r'(?<="rc":"OK",).*\]'
     find = re.search(pattern, response.text)
     if find:
         cities = []
         result = json.loads(f"{{{find[0]}}}")
-        print('res', result)
         for res in result['sr']:
             if res['type'] == "CITY" or res['type'] == "NEIGHBORHOOD":
                 cities.append({'city_name': res["regionNames"]["shortName"], 'destination_id': res["gaiaId"]})
-        print('ct', cities)
+
+        make_log(lvl='info', text=f'(func: find_city): end working for {city_name}')
         return cities
     else:
         return None
 
-# find_city('Лондон')
 
-
-def find_address_and_photos(hotel_id: str, photos_need: bool, photos_amount: int) -> list:
-    """ Делает запрос для получения адреса и при необходимости фото
-    для функции send_info (Для проверки используется в make_info_message ниже). """
+def find_address_and_photos(hotel_id: str, photos_need: bool, photos_amount: int) -> list | None:
+    """
+    Делает запрос для получения адреса и при необходимости фото для функций make_info_message, make_bestdeal_message.
+    """
+    make_log(lvl="info", text="(func: find_address_and_photos): start working")
 
     url = "https://hotels4.p.rapidapi.com/properties/v2/get-summary"
     headers = {
@@ -76,10 +77,9 @@ def find_address_and_photos(hotel_id: str, photos_need: bool, photos_amount: int
     }
 
     response = request_to_api(mode="POST", url=url, headers=headers, query=payload)
-    print('fiadpho', response.text)
     pattern = r'(?<="data":{).*}{3}'
+
     find = re.search(pattern, response.text)
-    print('f0', find[0])
     if find:
         messages = list()
         results = json.loads(f"{{{find[0][:-2]}}}")
@@ -97,16 +97,17 @@ def find_address_and_photos(hotel_id: str, photos_need: bool, photos_amount: int
             else:
                 messages.append(None)
 
-            print('mes', messages)
+            make_log(lvl="info", text="(func: find_address_and_photos): end working")
             return messages
 
-        except (KeyError, TypeError):
+        except (KeyError, TypeError) as exc:
+            make_log(lvl="error", text=f"(func: find_address_and_photos): {exc}")
             return None
 
 
-def make_info_message(results: dict, number_days: int, photos_need: bool, photos_amount: int) -> list:
+def make_info_message(results: dict, number_days: int, photos_need: bool, photos_amount: int) -> list | None:
     """ Преобразует полученный запрос в список, где каждый элемент содержит id отеля и сообщение о нем. """
-    make_log(lvl='info', text=f'making messages for low or high')
+    make_log(lvl='info', text=f'(func: make_info_message): low or high start')
 
     messages = list()
     try:
@@ -137,15 +138,18 @@ def make_info_message(results: dict, number_days: int, photos_need: bool, photos
 
             messages.append([hotel_id, message, photos])
 
+        make_log(lvl='info', text=f'(func: make_info_message): low or high end')
         return messages
-    except (KeyError, TypeError):
+
+    except (KeyError, TypeError) as exc:
+        make_log(lvl='error', text=f'(func: make_info_message): {exc}')
         return None
 
 
 def find_hotels(city_id: str, hotels_amount: int, checkin_date: str, checkout_date: str, command: str,
-                photos_need: bool, photos_amount: int) -> list:
+                photos_need: bool, photos_amount: int) -> list | None:
     """Функция запроса по поиску отелей. Возвращает список со списками из ID отеля и строкой с сообщением"""
-    make_log(lvl='info', text='find hotels worked')
+    make_log(lvl='info', text='(func: find_hotels): start working')
 
     checkin_date_splited = checkin_date.split('-')
     checkout_date_splited = checkout_date.split('-')
@@ -189,25 +193,25 @@ def find_hotels(city_id: str, hotels_amount: int, checkin_date: str, checkout_da
 
     response = request_to_api(mode="POST", url=url, headers=headers, query=payload)
     pattern = r'(?<=HOT.SR.sort.PROPERTY_CLASS.false"}}]}]}]},).*(?=,"propertySearchListings")'
-    find = re.search(pattern, response.text)
-    if find:
-        results = json.loads(f"{{{find[0]}}}")
-        print(results)
-        number_days = calculate_days(checkin_date, checkout_date)
-        new_messages = make_info_message(results, number_days, photos_need, photos_amount)
-        print('nm', new_messages)
-        return new_messages
-    else:
+    try:
+        find = re.search(pattern, response.text)
+        if find:
+            results = json.loads(f"{{{find[0]}}}")
+            number_days = calculate_days(checkin_date, checkout_date)
+            new_messages = make_info_message(results, number_days, photos_need, photos_amount)
+            make_log(lvl='info', text='(func: find_hotels): end working')
+            return new_messages
+        else:
+            return None
+
+    except TypeError as exc:
+        make_log(lvl="error", text=f"(func: find_hotels) - {exc}")
         return None
-
-
-# find_hotels(city_id="2114", hotels_amount=10, checkin_date='2022-10-10', checkout_date='2022-10-15',
-#            command='/lowprice', photos_need=True, photos_amount=5)
 
 
 def check_center_distance(hotel_info: dict, distance_max: int) -> list:
     """ Функция проверяет отели на соответствие их расстояния до центра города заданному. """
-    make_log(lvl='info', text='check_center_distance worked')
+    make_log(lvl='info', text='(func: check_center_distance) worked')
 
     flag = False
     city_center_dist_km = 0
@@ -222,9 +226,9 @@ def check_center_distance(hotel_info: dict, distance_max: int) -> list:
 
 
 def make_bestdeal_message(results: dict, hotels_amount: int, distance_max: int, number_days: int,
-                          photos_need: bool, photos_amount: int) -> list:
+                          photos_need: bool, photos_amount: int) -> list | None:
     """ Преобразует полученный запрос в список, где каждый элемент содержит id отеля и сообщение о нем. """
-    make_log(lvl='info', text='make bestdeal message worked')
+    make_log(lvl='info', text='(func: make_bestdeal_message): start working')
 
     messages = list()
     try:
@@ -245,7 +249,7 @@ def make_bestdeal_message(results: dict, hotels_amount: int, distance_max: int, 
                 total_price = '$' + str(total * number_days)
 
                 message = ''.join([message, 'Расстояние от центра (км): ', city_center_distance_km, '\n',
-                                       'Цена за сутки: ', price, '\n', 'Цена за период: ', total_price, '\n'])
+                                   'Цена за сутки: ', price, '\n', 'Цена за период: ', total_price, '\n'])
 
                 to_find = find_address_and_photos(hotel_id, photos_need, photos_amount)
                 address = to_find[0]
@@ -260,17 +264,18 @@ def make_bestdeal_message(results: dict, hotels_amount: int, distance_max: int, 
             if len(messages) == hotels_amount:
                 break
 
+        make_log(lvl='info', text='(func: make_bestdeal_message): end working')
         return messages
 
     except (KeyError, TypeError) as exc:
-        make_log(lvl='error', text=f'bestdeal message {exc}')
+        make_log(lvl='error', text=f'(func: make_bestdeal_message): {exc}')
         return None
 
 
 def find_hotels_bestdeal(city_id: str, hotels_amount: int, checkin_date: str, checkout_date: str, photos_need: bool,
-                         photos_amount: int, distance_max: int, price_min: str, price_max: str) -> list:
+                         photos_amount: int, distance_max: int, price_min: str, price_max: str) -> list | None:
     """Функция запроса по поиску отелей. Возвращает список со списками из ID отеля и строкой с сообщением"""
-    make_log(lvl='info', text='find hotels bestdeal worked')
+    make_log(lvl='info', text='(func: find_hotels_bestdeal): start working')
 
     checkin_date_splited = checkin_date.split('-')
     checkout_date_splited = checkout_date.split('-')
@@ -310,19 +315,19 @@ def find_hotels_bestdeal(city_id: str, hotels_amount: int, checkin_date: str, ch
 
     response = request_to_api(mode="POST", url=url, headers=headers, query=payload)
     pattern = r'(?<=HOT.SR.sort.PROPERTY_CLASS.false"}}]}]}]},).*(?=,"propertySearchListings")'
-    find = re.search(pattern, response.text)
-    new_messages = []
-    if find:
-        results = json.loads(f"{{{find[0]}}}")
-        number_days = calculate_days(checkin_date, checkout_date)
-        messages = make_bestdeal_message(results, hotels_amount, distance_max, number_days, photos_need, photos_amount)
-        new_messages.extend(messages)
-        print('nm', new_messages)
-        return new_messages
+    try:
+        find = re.search(pattern, response.text)
+        new_messages = []
+        if find:
+            results = json.loads(f"{{{find[0]}}}")
+            number_days = calculate_days(checkin_date, checkout_date)
+            messages = make_bestdeal_message(results, hotels_amount, distance_max, number_days, photos_need, photos_amount)
+            new_messages.extend(messages)
+            make_log(lvl='info', text='(func: find_hotels_bestdeal): end working')
+            return new_messages
 
-    else:
+        else:
+            return None
+    except TypeError as exc:
+        make_log(lvl="error", text=f"(func: find_hotels_bestdeal): - {exc}")
         return None
-
-
-# find_hotels_bestdeal(city_id="2114", hotels_amount=10, checkin_date='2022-10-10', checkout_date='2022-10-15',
-#                     photos_need=True, photos_amount=5, distance_max=15, price_min='10', price_max='100')

@@ -1,4 +1,5 @@
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from log_func import make_log
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 def yes_or_no() -> InlineKeyboardMarkup:
@@ -9,4 +10,6 @@ def yes_or_no() -> InlineKeyboardMarkup:
     keyboard.add(key_yes)
     key_no = InlineKeyboardButton(text='Нет', callback_data='no')
     keyboard.add(key_no)
+
+    make_log(lvl="info", text="(func: yes_or_no): yes or no markup made")
     return keyboard
