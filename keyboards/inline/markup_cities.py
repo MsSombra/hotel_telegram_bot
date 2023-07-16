@@ -1,6 +1,6 @@
 # from api_req import find_city_id
 from api_req2 import find_city_id
-from log_func import make_log
+from logging_func import logger
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
@@ -13,8 +13,8 @@ def city_markup(name_city: str) -> InlineKeyboardMarkup | None:
         for city in cities:
             destinations.add(InlineKeyboardButton(text=city['city_name'], callback_data=city['destination_id']))
 
-        make_log(lvl="info", text="(func: city_markup): city markup made")
+        logger.info("city markup made")
         return destinations
     else:
-        make_log(lvl="info", text="(func: city_markup): no cities")
+        logger.info("no cities")
         return None

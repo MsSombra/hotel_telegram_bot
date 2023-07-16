@@ -1,7 +1,7 @@
 from handlers import default_handlers, my_handlers
 from keyboards.inline import all_commands
 from loader import bot
-from log_func import make_log
+from logging_func import logger
 from media.send_media import one_photo
 from telebot.types import Message
 
@@ -9,7 +9,7 @@ from telebot.types import Message
 @bot.message_handler(commands=['start'])
 def bot_start(message: Message) -> None:
     """ Команда start. Отправляет пользователю приветственное сообщение и кнопки с командами. """
-    make_log(lvl='info', text=f'start command reply worked for chat_id: {message.chat.id}')
+    logger.info(f'start command reply worked for chat_id: {message.chat.id}')
 
     one_photo(message=message, file_name='Barlyman.png')
 
@@ -25,7 +25,7 @@ def callback_inline(call):
     """ Обрабатывает нажатие кнопок с командами бота. """
 
     if call.message:
-        make_log(lvl='info', text=f'callback for inline commands worked for chat_id {call.message.chat.id}')
+        logger.info(f'callback for inline commands worked for chat_id {call.message.chat.id}')
 
         if call.data == '/help':
             default_handlers.help.bot_help(call.message)

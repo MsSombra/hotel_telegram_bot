@@ -2,7 +2,7 @@
 from api_req2 import find_hotels, find_hotels_bestdeal
 from database.db_for_history import HotelsInfo
 from loader import bot
-from log_func import make_log
+from logging_func import logger
 from media.send_media import one_animation, one_photo, several_photos
 from telebot.types import Message
 
@@ -12,7 +12,7 @@ def send_info(message: Message, dct: dict):
     Отправляет сообщение с информацией по отелям. Вызывает функцию поиска информации.
     Получает список и отправляет сообщение для каждого элемента.
     """
-    make_log(lvl='info', text=f'(func: send_info): send info started for chat_id {message.chat.id}')
+    logger.info(f'send info started for chat_id {message.chat.id}')
 
     get_photo = dct['photos_need']
     number_photo = dct['photos_amount']

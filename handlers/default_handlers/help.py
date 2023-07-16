@@ -1,5 +1,5 @@
 from loader import bot
-from log_func import make_log
+from logging_func import logger
 from media.send_media import one_photo
 from telebot.types import Message
 
@@ -7,7 +7,7 @@ from telebot.types import Message
 @bot.message_handler(commands=['help'])
 def bot_help(message: Message) -> None:
     """ Команда help. Отправляет пользователю пояснения имеющихся команд. """
-    make_log(lvl='info', text=f'help command reply worked for chat_id {message.chat.id}')
+    logger.info(f'help command reply worked for chat_id {message.chat.id}')
 
     one_photo(message=message, file_name='Gorlum.png')
 

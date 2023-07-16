@@ -1,11 +1,11 @@
 import datetime
 
-from log_func import make_log
+from logging_func import logger
 
 
 def calculate_days(checkin_date: str, checkout_date: str) -> int:
     """ Считает количество дней пребывания в отеле. """
-    make_log(lvl='info', text='(func: calculate_days): period calculated')
+    logger.info('period calculated')
 
     pattern = '%Y-%m-%d'
     day_1 = datetime.datetime.strptime(checkin_date, pattern)
