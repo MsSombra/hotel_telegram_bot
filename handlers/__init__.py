@@ -1,2 +1,1 @@
-from . import default_handlers
-from . import my_handlers
+from . import default_handlers, my_handlers

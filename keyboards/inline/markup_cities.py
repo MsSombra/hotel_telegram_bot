@@ -1,7 +1,8 @@
 # from api_req import find_city_id
+from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
+
 from api_req2 import find_city_id
 from logging_func import logger
-from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 def city_markup(name_city: str) -> InlineKeyboardMarkup | None:

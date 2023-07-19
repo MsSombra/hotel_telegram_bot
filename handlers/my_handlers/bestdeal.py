@@ -1,7 +1,8 @@
+from telebot.types import Message
+
 from loader import bot
 from logging_func import logger
 from media.send_media import one_animation
-from telebot.types import Message
 from user_states.FSM import UserInfoState
 
 from . import send_hotels_info

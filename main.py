@@ -1,9 +1,9 @@
-from loader import bot
 from telebot.custom_filters import StateFilter
-import handlers
-from utils.set_bot_commands import set_all_commands
-from logging_func import logger, logging_config
 
+import handlers
+from loader import bot
+from logging_func import logger, logging_config
+from utils.set_bot_commands import set_all_commands
 
 if __name__ == '__main__':
     logging_config()

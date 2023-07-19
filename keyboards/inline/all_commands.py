@@ -1,5 +1,6 @@
-from logging_func import logger
 from telebot.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+from logging_func import logger
 
 
 def commands_markup() -> InlineKeyboardMarkup:

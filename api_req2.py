@@ -2,11 +2,11 @@ import json
 import re
 
 import requests
+
 from config_data.config import RAPID_API_KEY
 from logging_func import logger
 # from utils.bestdeal_create_message import make_bestdeal_message
 from utils.calculate_period import calculate_days
-
 
 HEADERS_API = {"X-RapidAPI-Key": RAPID_API_KEY, "X-RapidAPI-Host": "hotels4.p.rapidapi.com"}
 

@@ -1,6 +1,7 @@
+from telebot.types import Message
+
 from loader import bot
 from logging_func import logger
-from telebot.types import Message
 from utils.create_history_message import make_history_message
 
 

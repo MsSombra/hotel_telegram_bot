@@ -1,10 +1,11 @@
 # from api_req import find_hotels, find_hotels_bestdeal, find_photo_url
+from telebot.types import Message
+
 from api_req2 import find_hotels, find_hotels_bestdeal
 from database.db_for_history import HotelsInfo
 from loader import bot
 from logging_func import logger
 from media.send_media import one_animation, one_photo, several_photos
-from telebot.types import Message
 
 
 def send_info(message: Message, dct: dict):

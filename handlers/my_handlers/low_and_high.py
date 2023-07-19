@@ -1,6 +1,7 @@
+from telebot.types import Message
+
 from loader import bot
 from logging_func import logger
-from telebot.types import Message
 from user_states.FSM import UserInfoState
 
 

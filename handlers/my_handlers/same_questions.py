@@ -1,13 +1,14 @@
 from datetime import date
 
+from telebot.types import CallbackQuery, Message
+from telegram_bot_calendar import LSTEP, DetailedTelegramCalendar
+
 from database.db_for_history import UserReq
 from keyboards.inline.markup_cities import city_markup
 from keyboards.inline.yes_no_reply import yes_or_no
 from loader import bot
 from logging_func import logger
 from media.send_media import one_animation
-from telebot.types import CallbackQuery, Message
-from telegram_bot_calendar import LSTEP, DetailedTelegramCalendar
 from user_states.FSM import UserInfoState
 from utils.change_language_date import change_language_date
 

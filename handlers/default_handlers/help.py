@@ -1,7 +1,8 @@
+from telebot.types import Message
+
 from loader import bot
 from logging_func import logger
 from media.send_media import one_photo
-from telebot.types import Message
 
 
 @bot.message_handler(commands=['help'])

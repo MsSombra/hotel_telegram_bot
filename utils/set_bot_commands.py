@@ -1,5 +1,6 @@
-from loader import bot
 from telebot.types import BotCommand
+
+from loader import bot
 
 
 def set_all_commands():

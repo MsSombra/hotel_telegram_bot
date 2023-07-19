@@ -1,5 +1,6 @@
+from telebot.types import InputMediaPhoto, Message
+
 from loader import bot
-from telebot.types import Message, InputMediaPhoto
 
 
 def one_photo(message: Message, file_name: str) -> None:
